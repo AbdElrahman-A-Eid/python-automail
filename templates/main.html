@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="header mb-8">
+    <h1 class="text-4xl font-bold">Python AutoMail</h1>
+</div>
+<form method="post" id="form" enctype="multipart/form-data" class="form" name="form" onsubmit="submit_form(); return false;">
+    <div>
+        <label for="attendance_criteria" class="form-label">Filtering Criteria:</label>
+        <select id="attendance_criteria" name="attendance_criteria" class="form-input">
+            <option selected value="All">All</option>
+            <option value="Attended">Attended</option>
+            <option value="Absent">Absent</option>
+            <option value="Excused Absence">Excused Absence</option>
+        </select>
+    </div>
+
+    <div>
+        <label for="subject" class="form-label required">Subject:</label>
+        <input type="text" id="subject" name="subject" class="form-input" placeholder="Mail Subject" value="{% if session.subject != None %}{{session.subject}}{% endif %}" required>
+    </div>
+
+    <label for="context_variables" class="form-label required">Context Variables:</label>
+    <div id="context-variables">
+        {% for ctx in context_variables %}
+            {% set random_index = range(1, 999999999)|random %}
+            <div class="context-variable mb-2 context-row" data-index="{{ random_index }}">
+                <input type="text" name="context_name_{{ random_index }}" class="form-input context-name mr-2 mb-0" value="{{ ctx.key }}" placeholder="Context Name" required>
+                <select name="context_type_{{ random_index }}" class="form-input context-type mr-2 mb-0" required>
+                    <option value="string" {% if ctx.type == 'string' %}selected{% endif %}>String</option>
+                    <option value="datetime" {% if ctx.type == 'datetime' %}selected{% endif %}>DateTime</option>
+                    <option value="url" {% if ctx.type == 'url' %}selected{% endif %}>URL</option>
+                    <option value="email" {% if ctx.type|string() == 'email' %}selected{% endif %}>Email</option>
+                    <option value="number" {% if ctx.type == 'number' %}selected{% endif %}>Numeric</option>
+                </select>
+                <input type="{{ctx.type}}" name="context_value_{{ random_index }}" class="form-input context-value mr-2 mb-0" value="{{ ctx.value }}" {% if ctx.type == 'number' %}step='any'{% endif %} placeholder="Value" required>
+                <button type="button" class="remove-context-variable ml-2 text-red-500 delete-btn"><i class="fas fa-trash-alt"></i></button>
+            </div>
+        {% endfor %}
+    </div>
+    <button type="button" id="add-context-variable" class="form-submit mb-4"><i class="fas fa-plus"></i> Add Context Variable</button>
+
+    <div>
+        <label for="body" class="form-label required">Body:</label>
+        <textarea id="body" name="body" class="form-textarea" placeholder="Write you email body or load a template below." required>{% if session.body != None %}{{session.body}}{% endif %}</textarea>
+        <div class="form-actions mt-2 grid grid-cols-3 gap-4">
+            <label for="load-template" class="form-file col-span-2">Click to Load HTML Template</label>
+            <input type="file" id="load-template" class="form-file col-span-2 form-submit w-full hidden">
+            <button type="button" id="save-template" class="form-submit w-full" style="height: 73%;">Save Template</button>
+        </div>
+        <input id="body_link" name="body_link" type="text" style="display: none;">
+    </div>
+
+    <div>
+        <label for="mail_list" class="form-label required">Mail List:</label>
+        <input type="file" id="mail_list" name="mail_list" class="form-file" required>
+    </div>
+
+    <div>
+        <label for="attachments" class="form-label">Attachment File(s):</label>
+        <input type="file" id="attachments" name="attachments" class="form-file" multiple>
+    </div>
+
+    <div>
+        <button id="submit" type="submit" class="form-submit w-full">Send Email(s)</button>
+    </div>
+</form>
+
+<script>
+    document.getElementById("load-template").addEventListener("change", function () {
+        let file = this.files[0];
+        let reader = new FileReader();
+        reader.onload = function (e) {
+            let parser = new DOMParser();
+            let doc = parser.parseFromString(e.target.result, "text/html");
+            let content = doc.body.innerHTML;
+            tinymce.get("body").setContent(content);
+        };
+        document.getElementById("body_ifr").focus()
+        reader.readAsText(file);
+    });
+
+    function convert_to_blob() {
+            let content = tinymce.get("body").getContent();
+            let doc = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>${document.getElementById("subject").value}</title>
+</head>
+<body>
+${content}
+</body>
+</html>`;
+            let blob = new Blob([doc], { type: "text/html" });
+            hidden_field = document.getElementById("body_link")
+            hidden_field.value = URL.createObjectURL(blob);
+            return blob;
+        }
+
+    function addContextVariable(index) {
+        return `
+            <div class="context-variable mb-2 context-row" data-index="${index}">
+                <input type="text" name="context_name_${index}" class="form-input context-name mr-2 mb-0" placeholder="Context Name" required>
+                <select name="context_type_${index}" class="form-input context-type mr-2 mb-0" required>
+                    <option value="string">String</option>
+                    <option value="datetime">DateTime</option>
+                    <option value="url">URL</option>
+                    <option value="email">Email</option>
+                    <option value="number">Numeric</option>
+                </select>
+                <input type="text" name="context_value_${index}" class="form-input context-value mr-2 mb-0" placeholder="Value" required>
+                <button type="button" class="remove-context-variable ml-2 text-red-500 delete-btn"><i class="fas fa-trash-alt"></i></button>
+            </div>`;
+    }
+
+    function updateContextVariableEvents() {
+        document.querySelectorAll('.remove-context-variable').forEach(button => {
+            button.addEventListener('click', function () {
+                const contextVariables = document.getElementById('context-variables');
+                this.parentElement.remove();
+            });
+        });
+
+        document.querySelectorAll('.context-type').forEach(select => {
+            select.addEventListener('change', function () {
+                const input = this.parentElement.querySelector('.context-value');
+                if (this.value === 'datetime') {
+                    input.type = 'datetime-local';
+                } else if (this.value === 'string') {
+                    input.type = 'text';
+                } else if (this.value === 'url') {
+                    input.type = 'url';
+                } else if (this.value === 'email') {
+                    input.type = 'email';
+                }  else if (this.value === 'number') {
+                    input.type = 'number';
+                    input.step = 'any';
+                }
+            });
+        });
+    }
+
+    document.getElementById('add-context-variable').addEventListener('click', function () {
+        const contextVariables = document.getElementById('context-variables');
+        const index = Math.floor(Math.random() * 999999999);
+        contextVariables.insertAdjacentHTML('beforeend', addContextVariable(index));
+        updateContextVariableEvents();
+    });
+
+    document.getElementById("save-template").addEventListener("click", async () => {
+        await convert_to_blob()
+        let a = document.createElement("a");
+        a.href = document.getElementById("body_link").value;
+        a.download = "template.html";
+        a.click();
+    });
+
+    const root = document.getElementsByTagName('body')[0]
+    
+    function generateAlert(response) {
+        const div = document.createElement("div");
+        if (response.status == 200) {
+            const ul = document.createElement("ul");
+            ul.classList.add("list-disc")
+            response.emails.forEach((email)=>{
+                li = document.createElement("li");
+                li.innerHTML = email;
+                li.classList.add("ml-6")
+                li.classList.add("text-sm")
+                ul.appendChild(li)
+            });
+            type = {
+                color : 'green',
+                title : `Mail(s) are sent successfully!`,
+                message: `Here are the ${response.count} mail address(es):`,
+                details: ul.outerHTML,
+                icon : `<path fill="currentColor" d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10s10-4.5 10-10S17.5 2 12 2m-2 15l-5-5l1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9Z"/>`   
+            }
+        } else {
+            type = {
+                color : `red`,
+                title : `Mail(s) are NOT sent!`,
+                message: `Here is the error message:`,
+                details: response.message,
+                icon : `<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="m10.25 5.75l-4.5 4.5m0-4.5l4.5 4.5"/><circle cx="8" cy="8" r="6.25"/></g>`
+            }
+        }
+        div.innerHTML = `
+            <div class="bg-${type.color}-100 border-t-4 border-${type.color}-500 rounded-b text-${type.color}-900 px-4 py-3 shadow-md opacity-100" role="alert" style="position: absolute; top:10px; right: 10px;">
+                <div class="flex">
+                    <div class="text-${type.color} text-2xl mt-1">${type.icon}</div>
+                    <div class="py-1"><svg class="fill-current h-6 w-6 text-${type.color}-500 mr-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30">${type.icon}</svg></div>
+                    <div>
+                        <p class="font-bold">${type.title}</p>
+                        <p class="text-sm">${type.message}</p>
+                        <p class="text-sm">${type.details}</p>
+                    </div>
+                </div>
+            </div>
+        `;
+        $("html, body").animate({ scrollTop: 0 }, "slow");
+        root.insertBefore(div, root.firstChild);
+        setTimeout(() => {
+            div.classList.remove("opacity-100");
+            div.classList.add("opacity-0")
+            setTimeout(() => {
+                div.remove();
+            }, 1000)
+        }, 10000);
+    }
+
+    async function submit_form(event) {
+        const form = document.getElementById("form")
+
+        blob = await convert_to_blob();
+        const data = new FormData(form)
+        data.append("body_file", blob, "template_mail.html")
+        
+        await $.ajax({
+            url: "/",
+            type: "POST",
+            data: data,
+            contentType: false,
+            cache: false,
+            processData: false,
+            success: function (response) {
+                generateAlert(response)
+            },
+            error: function (response) {
+                generateAlert(response.responseJSON)
+            }
+        });
+    };
+
+    updateContextVariableEvents();
+</script>
+{% endblock %}
