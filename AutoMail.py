@@ -11,11 +11,8 @@ from pathlib import Path
 from traceback import format_exc
 
 from dotenv import load_dotenv
-from flask import (Flask, flash, redirect, render_template, request, session,
-                   url_for)
+from flask import (Flask, flash, redirect, render_template, request, url_for)
 from jinja2 import Template
-
-from flask_session import Session
 
 # Load your env variables
 load_dotenv()
@@ -70,7 +67,7 @@ class WebApp:
 
     def _fresh_load(self):
         for key in os.environ:
-            if 'ctx_' in key.lower():
+            if 'pyauto_ctx_' in key.lower():
                 os.environ.pop(key)
         load_dotenv()
 
@@ -78,11 +75,11 @@ class WebApp:
         self._fresh_load()
         context_vars = []
         for key, value in os.environ.items():
-            if 'ctx_' in key.lower():
+            if 'pyauto_ctx_' in key.lower():
                 ctx = {}
                 key_splits = key.split('_')
-                ctx['key'] = '_'.join(key_splits[2:]).lower()
-                ctx['type'] = key_splits[1].lower()
+                ctx['key'] = '_'.join(key_splits[3:]).lower()
+                ctx['type'] = key_splits[2].lower()
                 ctx['value'] = value
                 context_vars.append(ctx)
         return context_vars
@@ -105,15 +102,10 @@ class WebApp:
                 subject = request.form["subject"]
                 body_file = request.files.get("body_file")
                 body_file.save(f'.tmp/{body_file.filename}')
-                body = request.form.get("body")
                 attendance_criteria = request.form.get("attendance_criteria")
                 mail_list = request.files.get("mail_list")
                 mail_list.save('.tmp/mail_list.csv')
                 attached_files = request.files.getlist('attachments')
-
-                session["subject"] = subject
-                session["body_filename"] = body_file.filename
-                session["body"] = body
 
                 if not subject or not mail_list.filename:
                     flash('You must specify all fields')
@@ -187,9 +179,6 @@ class WebApp:
 
 def create_app():
     flask_app = Flask(__name__, static_folder='static')
-    flask_app.config["SESSION_PERMANENT"] = False
-    flask_app.config["SESSION_TYPE"] = "filesystem"
-    Session(flask_app)
 
     sender = os.environ.get('FROM_MAIL')
     sender_name = os.environ.get('FROM_NAME')
