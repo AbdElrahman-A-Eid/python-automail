@@ -1,0 +1,70 @@
+.container {
+    max-width: 800px;
+    margin: auto;
+    padding: 20px;
+}
+.header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+.form-label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+.form-input, .form-textarea, .form-file {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+.form-submit {
+    background-color: #1D4ED8;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+.form-submit:hover {
+    background-color: #2563EB;
+}
+.required::after {
+    content: '*';
+    color: red;
+    margin-left: 5px;
+}
+.form-actions {
+    justify-content: space-between;
+    gap: 10px;
+}
+@media (min-width: 768px) {
+    .container {
+        max-width: 800px;
+    }
+}
+@media (min-width: 1024px) {
+    .container {
+        max-width: 900px;
+    }
+}
+.footer {
+    text-align: center;
+    margin-top: 20px;
+    padding: 20px;
+    background-color: #f4f4f4;
+    border-top: 1px solid #e2e2e2;
+}
+.context-row {
+    display: flex;
+    align-items: center !important;
+}
+.context-row .context-value {
+    flex-grow: 2;
+    margin-right: 10px;
+}
+.context-row .delete-btn {
+    margin-left: 10px;
+}

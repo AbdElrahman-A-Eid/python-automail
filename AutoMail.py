@@ -88,7 +88,7 @@ class WebApp:
 
     def index(self):
         if request.method == 'GET':
-            return render_template('main.html', tiny_api=os.environ.get("TINY_API_KEY"), context_variables=self.context_variables)
+            return render_template('index.html', tiny_api=os.environ.get("TINY_API_KEY"), context_variables=self.context_variables)
         else:
             try:
                 tmp_path = Path('.tmp')
