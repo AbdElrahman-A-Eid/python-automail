@@ -1,21 +1,24 @@
-# Load your env variables
-from dotenv import load_dotenv
-load_dotenv()
-
-import re
-import os
 import csv
+import os
+import re
 import smtplib
+from datetime import datetime
+from email.mime.application import MIMEApplication
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from glob import glob
 from pathlib import Path
-from jinja2 import Template
-from datetime import datetime
 from traceback import format_exc
+
+from dotenv import load_dotenv
+from flask import (Flask, flash, redirect, render_template, request, session,
+                   url_for)
+from jinja2 import Template
+
 from flask_session import Session
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-from email.mime.application import MIMEApplication
-from flask import Flask, render_template, request, flash, redirect, url_for, session
+
+# Load your env variables
+load_dotenv()
 
 class EmailSender:
     def __init__(self, sender, sender_name, password):
@@ -43,10 +46,11 @@ class EmailSender:
 
 class AutoMail:
     def __init__(self, template_path=None):
-        self.template = Template(open(template_path).read())
+        with open(template_path, encoding='utf-8') as file:
+            self.template = Template(file.read())
 
     def generate_emails(self, mail_list_filename):
-        with open(mail_list_filename) as file:
+        with open(mail_list_filename, encoding='utf-8') as file:
             mergemail_file = csv.DictReader(file)
             headers = mergemail_file.fieldnames
             for row in mergemail_file:
@@ -59,13 +63,13 @@ class AutoMail:
         return self.template.render(context)
 
 class WebApp:
-    def __init__(self, app, email_sender):
-        self.app = app
+    def __init__(self, flask_app, email_sender):
+        self.app = flask_app
         self.email_sender = email_sender
         self.context_variables = self.load_context_variables()
 
     def _fresh_load(self):
-        for key in os.environ.keys():
+        for key in os.environ:
             if 'ctx_' in key.lower():
                 os.environ.pop(key)
         load_dotenv()
@@ -88,7 +92,11 @@ class WebApp:
 
     def index(self):
         if request.method == 'GET':
-            return render_template('index.html', tiny_api=os.environ.get("TINY_API_KEY"), context_variables=self.context_variables)
+            return render_template(
+                'index.html', 
+                tiny_api=os.environ.get("TINY_API_KEY"),
+                context_variables=self.context_variables
+            )
         else:
             try:
                 tmp_path = Path('.tmp')
@@ -122,21 +130,26 @@ class WebApp:
                 emails = []
 
                 for row, headers in auto_mail.generate_emails('.tmp/mail_list.csv'):
-                    if attendance_criteria.lower() != 'all' and row['attendance'].lower() != attendance_criteria.lower():
+                    if attendance_criteria.lower() != 'all' \
+                        and row['attendance'].lower() != attendance_criteria.lower():
                         continue
-                    subject_replaced = self.replace_placeholders(subject, headers, row, context_variables)
+                    subject_replaced = self.replace_placeholders(
+                                            subject, headers, row, context_variables
+                                        )
                     email_body = auto_mail.render_email(row, headers, context_variables)
                     email = row['email']
                     recipient_name = f"{row['firstName']} {row['lastName']}"
 
                     try:
-                        self.email_sender.send_email(subject_replaced, email_body, parts, email, recipient_name)
+                        self.email_sender.send_email(
+                                subject_replaced, email_body, parts, email, recipient_name
+                            )
                         emails.append(email)
-                    except Exception as e:
+                    except (smtplib.SMTPConnectError, TimeoutError) as e:
                         print(f'Error: {e}')
 
                 return {'count': len(emails), 'emails': emails, "status": 200}, 200
-            except Exception as e:
+            except (RuntimeError, ValueError, TypeError, LookupError, OSError) as e:
                 print(format_exc())
                 print(f'Short Error: {e}')
                 return {'message': str(e), "status": 500}, 500
@@ -157,33 +170,36 @@ class WebApp:
             context_type = form[f'context_type_{index}']
             context_value = form[f'context_value_{index}']
             if context_type == 'datetime':
-                context_value = datetime.strftime(datetime.strptime(context_value, '%Y-%m-%dT%H:%M'), "%A, %B %d, %Y, %I:%M %p")
+                context_value = datetime.strftime(
+                        datetime.strptime(context_value, '%Y-%m-%dT%H:%M'),
+                        "%A, %B %d, %Y, %I:%M %p"
+                    )
             context_variables[context_name] = context_value
         return context_variables
 
     @staticmethod
     def replace_placeholders(text, headers, row, context_variables):
         for header in headers:
-            text = re.sub(f"{{{{\s*{header}\s*}}}}", row[header], text)
+            text = re.sub(rf"{{{{\s*{header}\s*}}}}", row[header], text)
         for k, v in context_variables.items():
-            text = re.sub(f"{{{{\s*{k}\s*}}}}", v, text)
+            text = re.sub(rf"{{{{\s*{k}\s*}}}}", v, text)
         return text
 
 def create_app():
-    app = Flask(__name__, static_folder='static')
-    app.config["SESSION_PERMANENT"] = False
-    app.config["SESSION_TYPE"] = "filesystem"
-    Session(app)
+    flask_app = Flask(__name__, static_folder='static')
+    flask_app.config["SESSION_PERMANENT"] = False
+    flask_app.config["SESSION_TYPE"] = "filesystem"
+    Session(flask_app)
 
     sender = os.environ.get('FROM_MAIL')
     sender_name = os.environ.get('FROM_NAME')
     password = os.environ.get('APP_PASS')
-
     email_sender = EmailSender(sender, sender_name, password)
-    web_app = WebApp(app, email_sender)
+
+    web_app = WebApp(flask_app, email_sender)
     web_app.setup_routes()
 
-    return app
+    return flask_app
 
 if __name__ == "__main__":
     app = create_app()
