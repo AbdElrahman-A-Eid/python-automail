@@ -1,81 +1,60 @@
-import csv
+"""This module manages the web application
+"""
 import os
 import re
-import smtplib
 from datetime import datetime
 from email.mime.application import MIMEApplication
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 from glob import glob
 from pathlib import Path
+from smtplib import SMTPConnectError
 from traceback import format_exc
+from typing import Dict, List
 
 from dotenv import load_dotenv
-from flask import (Flask, flash, redirect, render_template, request, url_for)
-from jinja2 import Template
+from flask import Flask, flash, redirect, render_template, request, url_for
 
-# Load your env variables
-load_dotenv()
+from auto_mail.auto_mail import AutoMail
+from auto_mail.email_sender import EmailSender
 
-class EmailSender:
-    def __init__(self, sender, sender_name, password):
-        self.sender = sender
-        self.sender_name = sender_name
-        self.password = password
-
-    def send_email(self, subject, body, parts, recipient, recipient_name):
-        message = MIMEMultipart('alternative')
-        message['Subject'] = subject
-        message['From'] = f'{self.sender_name} <{self.sender}>'
-        message['To'] = f'{recipient_name} <{recipient}>'
-        text_part = MIMEText(body, 'html')
-        message.attach(text_part)
-
-        for attach in parts:
-            name, part = list(attach.items())[0]
-            part["Content-Disposition"] = f'attachment; filename="{name}"'
-            message.attach(part)
-
-        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
-            server.login(self.sender, self.password)
-            server.sendmail(self.sender, recipient, message.as_string())
-        print(f"Message sent to {recipient}!")
-
-class AutoMail:
-    def __init__(self, template_path=None):
-        with open(template_path, encoding='utf-8') as file:
-            self.template = Template(file.read())
-
-    def generate_emails(self, mail_list_filename):
-        with open(mail_list_filename, encoding='utf-8') as file:
-            mergemail_file = csv.DictReader(file)
-            headers = mergemail_file.fieldnames
-            for row in mergemail_file:
-                yield row, headers
-
-    def render_email(self, row, headers, context_variables):
-        context = {}
-        context.update(context_variables)
-        context.update({header: row[header] for header in headers})
-        return self.template.render(context)
 
 class WebApp:
-    def __init__(self, flask_app, email_sender):
+    """
+    Class for managing the web application.
+    """
+
+    def __init__(self, flask_app: Flask, email_sender: EmailSender) -> None:
+        """
+        Initialize the WebApp class.
+
+        Args:
+            flask_app (Flask): The Flask application instance.
+            email_sender (EmailSender): An instance of the EmailSender class.
+        """
         self.app = flask_app
         self.email_sender = email_sender
         self.context_variables = self.load_context_variables()
 
-    def _fresh_load(self):
+    def _fresh_load(self) -> None:
+        """
+        Reload environment variables from the .env file.
+        """
         for key in os.environ:
             if 'pyauto_ctx_' in key.lower():
                 os.environ.pop(key)
         load_dotenv()
 
-    def load_context_variables(self):
+    def load_context_variables(self) -> List[Dict[str, str]]:
+        """
+        Load context variables from environment variables.
+
+        Returns:
+            List[Dict[str, str]]: A list of context variable dictionaries.
+        """
         self._fresh_load()
         context_vars = []
         for key, value in os.environ.items():
             if 'pyauto_ctx_' in key.lower():
+                print(key, value)
                 ctx = {}
                 key_splits = key.split('_')
                 ctx['key'] = '_'.join(key_splits[3:]).lower()
@@ -84,10 +63,19 @@ class WebApp:
                 context_vars.append(ctx)
         return context_vars
 
-    def setup_routes(self):
+    def setup_routes(self) -> None:
+        """
+        Setup the URL routes for the Flask application.
+        """
         self.app.add_url_rule("/", view_func=self.index, methods=['GET', 'POST'])
 
     def index(self):
+        """
+        Handle the index route for rendering and processing the email form.
+
+        Returns:
+            The rendered template or a JSON response.
+        """
         if request.method == 'GET':
             return render_template(
                 'index.html', 
@@ -121,23 +109,23 @@ class WebApp:
                 auto_mail = AutoMail(f'.tmp/{body_file.filename}')
                 emails = []
 
-                for row, headers in auto_mail.generate_emails('.tmp/mail_list.csv'):
-                    if attendance_criteria.lower() != 'all' \
-                        and row['attendance'].lower() != attendance_criteria.lower():
+                for row, headers in auto_mail.generate_email_fields('.tmp/mail_list.csv'):
+                    if (attendance_criteria.lower() != 'all'
+                        and row['attendance'].lower() != attendance_criteria.lower()):
                         continue
                     subject_replaced = self.replace_placeholders(
-                                            subject, headers, row, context_variables
-                                        )
+                        subject, headers, row, context_variables
+                    )
                     email_body = auto_mail.render_email(row, headers, context_variables)
                     email = row['email']
                     recipient_name = f"{row['firstName']} {row['lastName']}"
 
                     try:
                         self.email_sender.send_email(
-                                subject_replaced, email_body, parts, email, recipient_name
-                            )
+                            subject_replaced, email_body, parts, email, recipient_name
+                        )
                         emails.append(email)
-                    except (smtplib.SMTPConnectError, TimeoutError) as e:
+                    except (SMTPConnectError, TimeoutError) as e:
                         print(f'Error: {e}')
 
                 return {'count': len(emails), 'emails': emails, "status": 200}, 200
@@ -153,7 +141,16 @@ class WebApp:
                 print('Cleared temporary files!')
 
     @staticmethod
-    def parse_context_variables(form):
+    def parse_context_variables(form: Dict[str, str]) -> Dict[str, str]:
+        """
+        Parse context variables from the form data.
+
+        Args:
+            form (Dict[str, str]): The form data.
+
+        Returns:
+            Dict[str, str]: A dictionary of context variables.
+        """
         context_variables = {}
         context_names = [key for key in form.keys() if key.startswith('context_name_')]
         for name in context_names:
@@ -163,33 +160,30 @@ class WebApp:
             context_value = form[f'context_value_{index}']
             if context_type == 'datetime':
                 context_value = datetime.strftime(
-                        datetime.strptime(context_value, '%Y-%m-%dT%H:%M'),
-                        "%A, %B %d, %Y, %I:%M %p"
-                    )
+                    datetime.strptime(context_value, '%Y-%m-%dT%H:%M'),
+                    "%A, %B %d, %Y, %I:%M %p"
+                )
             context_variables[context_name] = context_value
         return context_variables
 
     @staticmethod
-    def replace_placeholders(text, headers, row, context_variables):
+    def replace_placeholders(
+        text: str, headers: List[str], row: Dict[str, str], context_variables: Dict[str, str]
+        ) -> str:
+        """
+        Replace placeholders in the text with values from headers and context variables.
+
+        Args:
+            text (str): The text with placeholders.
+            headers (List[str]): The list of field headers.
+            row (Dict[str, str]): The dictionary of email fields.
+            context_variables (Dict[str, str]): The dictionary of context variables.
+
+        Returns:
+            str: The text with placeholders replaced.
+        """
         for header in headers:
             text = re.sub(rf"{{{{\s*{header}\s*}}}}", row[header], text)
         for k, v in context_variables.items():
             text = re.sub(rf"{{{{\s*{k}\s*}}}}", v, text)
         return text
-
-def create_app():
-    flask_app = Flask(__name__, static_folder='static')
-
-    sender = os.environ.get('FROM_MAIL')
-    sender_name = os.environ.get('FROM_NAME')
-    password = os.environ.get('APP_PASS')
-    email_sender = EmailSender(sender, sender_name, password)
-
-    web_app = WebApp(flask_app, email_sender)
-    web_app.setup_routes()
-
-    return flask_app
-
-if __name__ == "__main__":
-    app = create_app()
-    app.run(debug=True)
