@@ -9,7 +9,7 @@ tinymce.init({
         'powerpaste', 'formatpainter', 'permanentpen', 'advtable', 'export',
         'linkchecker', 'a11ychecker', 'mediaembed',
         'advcode', 'editimage', 'image', 'tinydrive', 'visualblocks', 'autolink',
-        'help', 'table', 'lists', 'image', 'charmap', 'emoticons', 'code',
+        'help', 'table', 'lists', 'charmap', 'emoticons', 'code',
         'preview', 'importcss', 'wordcount', 'quickbars', 'pageembed'
     ],
     toolbar: 'undo redo | formatselect | bold italic backcolor | \

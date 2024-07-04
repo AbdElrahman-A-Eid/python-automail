@@ -21,6 +21,7 @@ document.getElementById('add-context-variable').addEventListener('click', functi
         <button type="button" class="remove-context-variable ml-2 text-red-500 delete-btn"><i class="fas fa-trash-alt"></i></button>
     `;
     contextVariablesDiv.appendChild(newContextVariableDiv);
+    updateContextVariables()
 });
 
 document.getElementById('context-variables').addEventListener('click', function (e) {
@@ -29,3 +30,23 @@ document.getElementById('context-variables').addEventListener('click', function 
         contextVariableDiv.remove();
     }
 });
+
+function updateContextVariables () {
+    document.querySelectorAll('.context-type').forEach(select => {
+        select.addEventListener('change', function () {
+            const input = this.parentElement.querySelector('.context-value');
+            if (this.value === 'datetime') {
+                input.type = 'datetime-local';
+            } else if (this.value === 'string') {
+                input.type = 'text';
+            } else if (this.value === 'url') {
+                input.type = 'url';
+            } else if (this.value === 'email') {
+                input.type = 'email';
+            }  else if (this.value === 'number') {
+                input.type = 'number';
+                input.step = 'any';
+            }
+        });
+    });
+}
