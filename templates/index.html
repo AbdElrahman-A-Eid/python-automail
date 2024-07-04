@@ -21,12 +21,23 @@
         </div>
         <form method="post" id="form" enctype="multipart/form-data" class="form" name="form" onsubmit="submit_form(); return false;">
             <div>
-                <label for="attendance_criteria" class="form-label">Filtering Criteria:</label>
+                <label for="attendance_criteria" class="form-label">Attendance Filtering Criteria:</label>
                 <select id="attendance_criteria" name="attendance_criteria" class="form-input">
                     <option selected value="All">All</option>
                     <option value="Attended">Attended</option>
                     <option value="Absent">Absent</option>
                     <option value="Excused Absence">Excused Absence</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="progress_criteria" class="form-label">Prorgess Filtering Criteria:</label>
+                <select id="progress_criteria" name="progress_criteria" class="form-input">
+                    <option selected value="All">All</option>
+                    <option value="On Track">On Track</option>
+                    <option value="Behind">Behind</option>
+                    <option value="Critically Behind">Critically Behind</option>
+                    <option value="Ahead">Ahead</option>
                 </select>
             </div>
         

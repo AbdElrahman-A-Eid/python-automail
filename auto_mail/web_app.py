@@ -91,6 +91,7 @@ class WebApp:
                 body_file = request.files.get("body_file")
                 body_file.save(f'.tmp/{body_file.filename}')
                 attendance_criteria = request.form.get("attendance_criteria")
+                progress_criteria = request.form.get("progress_criteria")
                 mail_list = request.files.get("mail_list")
                 mail_list.save('.tmp/mail_list.csv')
                 attached_files = request.files.getlist('attachments')
@@ -110,8 +111,13 @@ class WebApp:
                 emails = []
 
                 for row, headers in auto_mail.generate_email_fields('.tmp/mail_list.csv'):
-                    if (attendance_criteria.lower() != 'all'
-                        and row['attendance'].lower() != attendance_criteria.lower()):
+                    attendance_condition = ('attendance' in headers
+                                    and attendance_criteria.lower() != 'all'
+                                    and row['attendance'].lower() != attendance_criteria.lower())
+                    progress_condition = ('progress' in headers
+                                    and progress_criteria.lower() != 'all'
+                                    and row['progress'].lower() != progress_criteria.lower())
+                    if attendance_condition or progress_condition:
                         continue
                     subject_replaced = self.replace_placeholders(
                         subject, headers, row, context_variables
