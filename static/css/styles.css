@@ -40,14 +40,9 @@
     justify-content: space-between;
     gap: 10px;
 }
-@media (min-width: 768px) {
-    .container {
-        max-width: 800px;
-    }
-}
 @media (min-width: 1024px) {
     .container {
-        max-width: 900px;
+        max-width: 80% !important;
     }
 }
 .footer {
