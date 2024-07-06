@@ -5,13 +5,14 @@ from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from typing import List, Dict
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 class EmailSender:
     """
     Class for sending emails using SMTP SSL.
     """
 
-    def __init__(self, sender: str, sender_name: str, password: str) -> None:
+    def __init__(self, sender: str, sender_name: str, password: str, num_processes: int) -> None:
         """
         Initialize the EmailSender class.
 
@@ -19,10 +20,12 @@ class EmailSender:
             sender (str): The sender's email address.
             sender_name (str): The sender's display name.
             password (str): The sender's app password.
+            num_processes (int): The number of parallel processes for sending emails.
         """
         self.sender = sender
         self.sender_name = sender_name
         self.password = password
+        self.num_processes = num_processes
 
     def send_email(
         self,
@@ -59,3 +62,36 @@ class EmailSender:
             server.login(self.sender, self.password)
             server.sendmail(self.sender, recipient, message.as_string())
         print(f"Message sent to {recipient}!")
+
+    def send_emails_parallel(
+        self,
+        subject: str,
+        body: str,
+        parts: List[Dict[str, MIMEApplication]],
+        recipients: List[Dict[str, str]]
+    ) -> None:
+        """
+        Send emails to multiple recipients in parallel.
+
+        Args:
+            subject (str): The email subject.
+            body (str): The email body.
+            parts (List[Dict[str, MIMEApplication]]): A list of dictionaries with filename as key \
+                and MIMEApplication objects representing email attachments as values.
+            recipients (List[Dict[str, str]]): A list of dictionaries with 'email' and 'name' keys \
+                representing recipient's email addresses and display names.
+        """
+        with ThreadPoolExecutor(max_workers=self.num_processes) as executor:
+            futures = [
+                executor.submit(
+                    self.send_email,
+                    subject,
+                    body,
+                    parts,
+                    recipient['email'],
+                    recipient['name']
+                )
+                for recipient in recipients
+            ]
+            for future in as_completed(futures):
+                future.result()  # Wait for all futures to complete

@@ -15,10 +15,11 @@ def create_app() -> Flask:
     """
     flask_app = Flask(__name__, static_folder='static')
 
-    sender = os.environ.get('FROM_MAIL', '')
-    sender_name = os.environ.get('FROM_NAME', '')
-    password = os.environ.get('APP_PASS', '')
-    email_sender = EmailSender(sender, sender_name, password)
+    sender = os.environ.get('PYAUTO_FROM_MAIL', '')
+    sender_name = os.environ.get('PYAUTO_FROM_NAME', '')
+    password = os.environ.get('PYAUTO_APP_PASS', '')
+    num_processes = int(os.environ.get('PYAUTO_NUM_PROCESSES', 1))
+    email_sender = EmailSender(sender, sender_name, password, num_processes)
 
     web_app = WebApp(flask_app, email_sender)
     web_app.setup_routes()
