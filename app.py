@@ -15,9 +15,9 @@ def create_app() -> Flask:
     """
     flask_app = Flask(__name__, static_folder='static')
 
-    sender = os.environ.get('FROM_MAIL', '')
-    sender_name = os.environ.get('FROM_NAME', '')
-    password = os.environ.get('APP_PASS', '')
+    sender = os.environ.get('PYAUTO_FROM_MAIL', '')
+    sender_name = os.environ.get('PYAUTO_FROM_NAME', '')
+    password = os.environ.get('PYAUTO_APP_PASS', '')
     email_sender = EmailSender(sender, sender_name, password)
 
     web_app = WebApp(flask_app, email_sender)
