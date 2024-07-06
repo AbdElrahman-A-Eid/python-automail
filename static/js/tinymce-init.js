@@ -4,13 +4,11 @@ tinymce.init({
     menubar: true,
     advcode_inline: true,
     plugins: [
-        'casechange', 'autosave', 'advlist', 'link', 'searchreplace',
-        'checklist', 'tinymcespellchecker', 'codesample', 'tableofcontents',
-        'powerpaste', 'formatpainter', 'permanentpen', 'advtable', 'export',
-        'linkchecker', 'a11ychecker', 'mediaembed',
-        'advcode', 'editimage', 'image', 'tinydrive', 'visualblocks', 'autolink',
-        'help', 'table', 'lists', 'charmap', 'emoticons', 'code',
-        'preview', 'importcss', 'wordcount', 'quickbars', 'pageembed'
+        'autosave', 'advlist', 'link', 'searchreplace',
+        'codesample', 'linkchecker', 'image', 'tinydrive',
+        'help', 'table', 'lists', 'charmap', 'emoticons',
+        'preview', 'importcss', 'wordcount', 'quickbars',
+        'visualblocks', 'autolink', 'code'
     ],
     toolbar: 'undo redo | formatselect | bold italic backcolor | \
             alignleft aligncenter alignright alignjustify | \
