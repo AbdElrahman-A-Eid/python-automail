@@ -54,7 +54,7 @@
                         <input type="text" name="context_name_{{ random_index }}" class="form-input context-name mr-2 mb-0" value="{{ ctx.key }}" placeholder="Context Name" required>
                         <select name="context_type_{{ random_index }}" class="form-input context-type mr-2 mb-0" required>
                             <option value="string" {% if ctx.type == 'string' %}selected{% endif %}>String</option>
-                            <option value="datetime" {% if ctx.type == 'datetime' %}selected{% endif %}>DateTime</option>
+                            <option value="datetime" {% if ctx.type == 'datetime-local' %}selected{% endif %}>DateTime</option>
                             <option value="url" {% if ctx.type == 'url' %}selected{% endif %}>URL</option>
                             <option value="email" {% if ctx.type|string() == 'email' %}selected{% endif %}>Email</option>
                             <option value="number" {% if ctx.type == 'number' %}selected{% endif %}>Numeric</option>
