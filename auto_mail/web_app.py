@@ -109,6 +109,7 @@ class WebApp:
                 context_variables = self.parse_context_variables(request.form)
                 auto_mail = AutoMail(f'.tmp/{body_file.filename}')
                 emails = []
+                recipients = []
 
                 for row, headers in auto_mail.generate_email_fields('.tmp/mail_list.csv'):
                     attendance_condition = ('attendance' in headers
@@ -127,13 +128,25 @@ class WebApp:
                     recipient_name = f"{row['firstName']} {row['lastName']}"
 
                     try:
-                        self.email_sender.send_email(
-                            subject_replaced, email_body, parts, email, recipient_name
-                        )
+                        if self.email_sender.num_processes > 1:
+                            recipients.append({'name': recipient_name,'email': email})
+                        else:
+                            self.email_sender.send_email(
+                                subject_replaced, email_body, parts, email, recipient_name
+                            )
                         emails.append(email)
                     except (SMTPConnectError, TimeoutError) as e:
                         print(f'Error: {e}')
 
+                if recipients:
+                    try:
+                        self.email_sender.send_emails_parallel(
+                                subject_replaced, email_body, parts, recipients
+                            )
+                    except (SMTPConnectError, TimeoutError) as e:
+                        print(f'Error: {e}')
+
+                print(f"Number of total emails sent is {len(emails)}!")
                 return {'count': len(emails), 'emails': emails, "status": 200}, 200
             except (RuntimeError, ValueError, TypeError, LookupError, OSError) as e:
                 print(format_exc())
