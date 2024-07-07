@@ -20,8 +20,13 @@
             <h1 class="text-4xl font-bold">Python AutoMail</h1>
         </div>
         <form method="post" id="form" enctype="multipart/form-data" class="form" name="form" onsubmit="submit_form(); return false;">
-            <div>
-                <label for="attendance_criteria" class="form-label">Attendance Filtering Criteria:</label>
+            <div class="form-group">
+                <label for="attendance_criteria" class="form-label">Attendance Filtering Criteria:
+                    <span class="tooltip-container">
+                        <i class="fas fa-question-circle"></i>
+                        <span class="tooltip-text">Filter the recipients based on their session attendance. This is only enabled if there is an "attendance" column in the mail list file.</span>
+                    </span>
+                </label>
                 <select id="attendance_criteria" name="attendance_criteria" class="form-input">
                     <option selected value="All">All</option>
                     <option value="Attended">Attended</option>
@@ -30,8 +35,13 @@
                 </select>
             </div>
 
-            <div>
-                <label for="progress_criteria" class="form-label">Prorgess Filtering Criteria:</label>
+            <div class="form-group">
+                <label for="progress_criteria" class="form-label">Progress Filtering Criteria:
+                    <span class="tooltip-container">
+                        <i class="fas fa-question-circle"></i>
+                        <span class="tooltip-text">Filter the recipients based on their progress. This is only enabled if there is a "progress" column in the mail list file.</span>
+                    </span>
+                </label>
                 <select id="progress_criteria" name="progress_criteria" class="form-input">
                     <option selected value="All">All</option>
                     <option value="On Track">On Track</option>
@@ -40,35 +50,52 @@
                     <option value="Ahead">Ahead</option>
                 </select>
             </div>
+            
+            <div class="form-group">
+                <label for="context_variables" class="form-label required"><span>Context Variables:</span>
+                    <span class="tooltip-container">
+                        <i class="fas fa-question-circle"></i>
+                        <span class="tooltip-text">Define context variables to be used in the email. These variables can be inserted into the email subject and/or body using Jinja2 format (e.g., {{ '{{ variable_name }}' }}).</span>
+                    </span>
+                </label>
+                <div id="context-variables">
+                    {% for ctx in context_variables %}
+                    {% set random_index = range(1, 999999999)|random %}
+                    <div class="context-variable mb-2 context-row" data-index="{{ random_index }}">
+                            <input type="text" name="context_name_{{ random_index }}" class="form-input context-name mr-2 mb-0" value="{{ ctx.key }}" placeholder="Context Name" required>
+                            <select name="context_type_{{ random_index }}" class="form-input context-type mr-2 mb-0" required>
+                                <option value="string" {% if ctx.type == 'string' %}selected{% endif %}>String</option>
+                                <option value="datetime" {% if ctx.type == 'datetime-local' %}selected{% endif %}>DateTime</option>
+                                <option value="url" {% if ctx.type == 'url' %}selected{% endif %}>URL</option>
+                                <option value="email" {% if ctx.type|string() == 'email' %}selected{% endif %}>Email</option>
+                                <option value="number" {% if ctx.type == 'number' %}selected{% endif %}>Numeric</option>
+                            </select>
+                            <input type="{{ctx.type}}" name="context_value_{{ random_index }}" class="form-input context-value mr-2 mb-0" value="{{ ctx.value }}" {% if ctx.type == 'number' %}step='any'{% endif %} placeholder="Value" required>
+                            <button type="button" class="remove-context-variable ml-2 text-red-500 delete-btn"><i class="fas fa-trash-alt"></i></button>
+                        </div>
+                    {% endfor %}
+                </div>
+                <button type="button" id="add-context-variable" class="form-submit mb-4"><i class="fas fa-plus"></i> Add Context Variable</button>
+            </div>
         
-            <div>
-                <label for="subject" class="form-label required">Subject:</label>
+            <div class="form-group">
+                <label for="subject" class="form-label required"><span>Subject:</span>
+                    <span class="tooltip-container">
+                        <i class="fas fa-question-circle"></i>
+                        <span class="tooltip-text">The subject of the mail. Can include Jinja2 template variables (e.g., {{ '{{ variable_name }}' }}) but "variable_name" must either be defined as a context variable or exist as a column in the mail list file.</span>
+                    </span>
+                </label>
                 <input type="text" id="subject" name="subject" class="form-input" placeholder="Mail Subject" value="{% if session.subject != None %}{{session.subject}}{% endif %}" required>
             </div>
         
-            <label for="context_variables" class="form-label required">Context Variables:</label>
-            <div id="context-variables">
-                {% for ctx in context_variables %}
-                    {% set random_index = range(1, 999999999)|random %}
-                    <div class="context-variable mb-2 context-row" data-index="{{ random_index }}">
-                        <input type="text" name="context_name_{{ random_index }}" class="form-input context-name mr-2 mb-0" value="{{ ctx.key }}" placeholder="Context Name" required>
-                        <select name="context_type_{{ random_index }}" class="form-input context-type mr-2 mb-0" required>
-                            <option value="string" {% if ctx.type == 'string' %}selected{% endif %}>String</option>
-                            <option value="datetime" {% if ctx.type == 'datetime-local' %}selected{% endif %}>DateTime</option>
-                            <option value="url" {% if ctx.type == 'url' %}selected{% endif %}>URL</option>
-                            <option value="email" {% if ctx.type|string() == 'email' %}selected{% endif %}>Email</option>
-                            <option value="number" {% if ctx.type == 'number' %}selected{% endif %}>Numeric</option>
-                        </select>
-                        <input type="{{ctx.type}}" name="context_value_{{ random_index }}" class="form-input context-value mr-2 mb-0" value="{{ ctx.value }}" {% if ctx.type == 'number' %}step='any'{% endif %} placeholder="Value" required>
-                        <button type="button" class="remove-context-variable ml-2 text-red-500 delete-btn"><i class="fas fa-trash-alt"></i></button>
-                    </div>
-                {% endfor %}
-            </div>
-            <button type="button" id="add-context-variable" class="form-submit mb-4"><i class="fas fa-plus"></i> Add Context Variable</button>
-        
-            <div>
-                <label for="body" class="form-label required">Body:</label>
-                <textarea id="body" name="body" class="form-textarea" placeholder="Write you email body or load a template below." required>{% if session.body != None %}{{session.body}}{% endif %}</textarea>
+            <div class="form-group">
+                <label for="body" class="form-label required"><span>Body:</span>
+                    <span class="tooltip-container">
+                        <i class="fas fa-question-circle"></i>
+                        <span class="tooltip-text">The body of the mail. Can include Jinja2 template variables (e.g., {{ '{{ variable_name }}' }}) but "variable_name" must either be defined as a context variable or exist as a column in the mail list file. Can be saved to/ loaded from an HTML template file.</span>
+                    </span>
+                </label>
+                <textarea id="body" name="body" class="form-textarea" placeholder="Write your email body or load a template below." required>{% if session.body != None %}{{session.body}}{% endif %}</textarea>
                 <div class="form-actions mt-2 grid grid-cols-3 gap-4">
                     <label for="load-template" class="form-file col-span-2">Click to Load HTML Template</label>
                     <input type="file" id="load-template" class="form-file col-span-2 form-submit w-full hidden">
@@ -77,17 +104,27 @@
                 <input id="body_link" name="body_link" type="text" style="display: none;">
             </div>
         
-            <div>
-                <label for="mail_list" class="form-label required">Mail List:</label>
+            <div class="form-group">
+                <label for="mail_list" class="form-label required"><span>Mail List:</span>
+                    <span class="tooltip-container">
+                        <i class="fas fa-question-circle"></i>
+                        <span class="tooltip-text">This CSV file should at least contain "firstName", "lastName", and "email" columns for the app to work.</span>
+                    </span>
+                </label>
                 <input type="file" id="mail_list" name="mail_list" class="form-file" required>
             </div>
         
-            <div>
-                <label for="attachments" class="form-label">Attachment File(s):</label>
+            <div class="form-group">
+                <label for="attachments" class="form-label"><span>Attachment File(s):</span>
+                    <span class="tooltip-container">
+                        <i class="fas fa-question-circle"></i>
+                        <span class="tooltip-text">Files to be attached to the email.</span>
+                    </span>
+                </label>
                 <input type="file" id="attachments" name="attachments" class="form-file" multiple>
             </div>
         
-            <div>
+            <div class="form-group">
                 <button id="submit" type="submit" class="form-submit w-full">Send Email(s)</button>
             </div>
         </form>

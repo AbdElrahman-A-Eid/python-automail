@@ -31,7 +31,7 @@
 .form-submit:hover {
     background-color: #2563EB;
 }
-.required::after {
+.required > span:first-of-type::after {
     content: '*';
     color: red;
     margin-left: 5px;
@@ -62,4 +62,30 @@
 }
 .context-row .delete-btn {
     margin-left: 10px;
+}
+.tooltip-container {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+    margin-left: 5px;
+}
+.tooltip-container .tooltip-text {
+    visibility: hidden;
+    width: 500px;
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 10px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -110px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+.tooltip-container:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
 }
