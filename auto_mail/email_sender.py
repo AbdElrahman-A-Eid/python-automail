@@ -65,8 +65,6 @@ class EmailSender:
 
     def send_emails_parallel(
         self,
-        subject: str,
-        body: str,
         parts: List[Dict[str, MIMEApplication]],
         recipients: List[Dict[str, str]]
     ) -> None:
@@ -74,19 +72,18 @@ class EmailSender:
         Send emails to multiple recipients in parallel.
 
         Args:
-            subject (str): The email subject.
-            body (str): The email body.
             parts (List[Dict[str, MIMEApplication]]): A list of dictionaries with filename as key \
                 and MIMEApplication objects representing email attachments as values.
-            recipients (List[Dict[str, str]]): A list of dictionaries with 'email' and 'name' keys \
-                representing recipient's email addresses and display names.
+            recipients (List[Dict[str, str]]): A list of dictionaries with 'email', 'name', \
+                'subject', and 'body' keys representing recipient's email addresses, display names,\
+                    and personalized subject and content.
         """
         with ThreadPoolExecutor(max_workers=self.num_processes) as executor:
             futures = [
                 executor.submit(
                     self.send_email,
-                    subject,
-                    body,
+                    recipient['subject'],
+                    recipient['body'],
                     parts,
                     recipient['email'],
                     recipient['name']

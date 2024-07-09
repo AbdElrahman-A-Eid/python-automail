@@ -133,7 +133,10 @@ class WebApp:
 
                     try:
                         if self.email_sender.num_processes > 1:
-                            recipients.append({'name': recipient_name,'email': email})
+                            recipients.append({
+                                'name': recipient_name,'email': email, 
+                                'subject': subject_replaced, 'body': email_body
+                                })
                         else:
                             self.email_sender.send_email(
                                 subject_replaced, email_body, parts, email, recipient_name
@@ -145,7 +148,7 @@ class WebApp:
                 if recipients:
                     try:
                         self.email_sender.send_emails_parallel(
-                                subject_replaced, email_body, parts, recipients
+                                parts, recipients
                             )
                     except (SMTPConnectError, TimeoutError) as e:
                         print(f'Error: {e}')
