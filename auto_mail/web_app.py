@@ -8,13 +8,15 @@ from glob import glob
 from pathlib import Path
 from smtplib import SMTPConnectError
 from traceback import format_exc
-from typing import Dict, List
+from typing import Dict, List, Any
 
 from dotenv import load_dotenv
 from flask import Flask, flash, redirect, render_template, request, url_for
+from langchain_core.exceptions import LangChainException
 
 from auto_mail.auto_mail import AutoMail
 from auto_mail.email_sender import EmailSender
+from auto_mail.template_generator import TemplateGenerator
 
 
 class WebApp:
@@ -52,6 +54,7 @@ class WebApp:
         """
         self._fresh_load()
         context_vars = []
+        print("Loading Permenant Context Variables:")
         for key, value in os.environ.items():
             if 'pyauto_ctx_' in key.lower():
                 print(key, value)
@@ -68,6 +71,7 @@ class WebApp:
         Setup the URL routes for the Flask application.
         """
         self.app.add_url_rule("/", view_func=self.index, methods=['GET', 'POST'])
+        self.app.add_url_rule("/generate", view_func=self.generate, methods=['POST'])
 
     def index(self):
         """
@@ -158,6 +162,47 @@ class WebApp:
                     os.remove(f)
                 os.rmdir('.tmp')
                 print('Cleared temporary files!')
+
+    def generate(self):
+        """_summary_
+
+        Returns:
+            _type_: _description_
+        """
+
+        if not os.environ.get("ANYSCALE_API_KEY", ""):
+            return {
+                "message": "Cannot find a proper ANYSCALE_API_KEY variable in .env file!",
+                "status": 500
+                }, 500
+
+        params: Dict[str, Any] = request.get_json()
+
+        user_prompt = params.pop("user_prompt")
+        if not user_prompt.strip():
+            return {
+                "message": "Prompt cannot be empty!",
+                "status": 500
+                }, 500
+
+        system_prompt = params.pop("system_prompt")
+
+        context_variables = params.pop("context_variables")
+
+        try:
+            generator = TemplateGenerator(
+                    model_name = params.pop("model"),
+                    **params
+                )
+        except (RuntimeError, LangChainException) as e:
+            return {
+                "message": e,
+                "status": 500
+                }, 500
+
+        template =  generator.generate_template(user_prompt, context_variables, system_prompt)
+
+        return template, 200
 
     @staticmethod
     def parse_context_variables(form: Dict[str, str]) -> Dict[str, str]:
