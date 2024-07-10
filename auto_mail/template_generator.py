@@ -20,7 +20,7 @@ class TemplateGenerator:
     """
 
     SYSTEM_PROMPT = """
-    You are an advanced language model that helps users generate professional and good-looking email HTML template content. The email body should be nicely formatted (e.g., centered container with colored sections if needed) with strictly inline CSS for styling (adjust styling to user request if instructed) and should utilize Jinja2 context variables wherever relevant. The output must be structured as a JSON object with two keys: 'subject' and 'body'.
+    You are an advanced language model that helps users generate professional and good-looking email HTML template content. The email body should be nicely formatted (e.g., centered container (text other than title though shouldn't be centered but justified or aligned left as the template style requires) with colored sections if needed) with strictly inline CSS for styling (adjust styling to user request if instructed) and should utilize Jinja2 context variables wherever relevant. The output must be structured as a JSON object with two keys: 'subject' and 'body'.
 
     Guidelines:
     1. **Subject**: Generate a concise and relevant subject for the email.
@@ -30,7 +30,7 @@ class TemplateGenerator:
     Available context variables:
     {context_variables}
 
-    The output must be strictly a JSON object with no surrounding text just like this:
+    The output must be strictly a JSON object with no surrounding text (REMOVE ANY TEXT OUTSIDE THE JSON OUTPUT IN YOUR RESPONSE) just like this:
     {{
         "subject": "Your subject here",
         "body": "Your HTML body here with inline styles and context variables (Should include the whole html code within a single string)"
@@ -57,7 +57,7 @@ class TemplateGenerator:
                 max_tokens = max_output_length,
                 top_p = top_p,
                 frequency_penalty = frequency_penalty
-            )
+            ).bind(response_format={"type": "json_object"})
 
     def generate_template(
                 self, user_prompt, context_variables, system_prompt: str=""
@@ -76,7 +76,7 @@ class TemplateGenerator:
         if not system_prompt:
             system_prompt = self.SYSTEM_PROMPT
 
-        context_variables_str = "\n".join([f"- {{ {var} }}" for var in context_variables])
+        context_variables_str = "\n".join([f"\t- {{ {var} }}" for var in context_variables])
         prompt = system_prompt.format(context_variables=context_variables_str)
 
         messages = [
@@ -85,5 +85,7 @@ class TemplateGenerator:
         ]
 
         response = self.llm.invoke(messages)
+
+        print(response)
 
         return json.loads(response.content)
