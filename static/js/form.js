@@ -41,7 +41,13 @@ document.getElementById('load-template').addEventListener('change', function () 
     }
 });
 
+const dimmedBackground = document.getElementById('dimmed-background');
+const loadingSpinner = document.getElementById('loading-spinner');
+
 async function submit_form() {
+    dimmedBackground.classList.toggle('show');
+    loadingSpinner.classList.add("show");
+
     const form = document.getElementById("form")
 
     const [blob, a] = convert_to_blob();
@@ -56,10 +62,14 @@ async function submit_form() {
         cache: false,
         processData: false,
         success: function (response) {
-            generateAlert(response)
+            dimmedBackground.classList.toggle('show');
+            loadingSpinner.classList.remove("show");
+            generateAlert(response, `Mail(s) are sent successfully!`)
         },
         error: function (response) {
-            generateAlert(response.responseJSON)
+            dimmedBackground.classList.toggle('show');
+            loadingSpinner.classList.remove("show");
+            generateAlert(response.responseJSON, `Mail(s) are NOT sent!`)
         }
     });
 }
