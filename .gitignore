@@ -280,3 +280,4 @@ templates/*_mail.html
 flask_session
 .tmp
 .conda
+*.ipynb

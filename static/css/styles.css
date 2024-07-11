@@ -7,6 +7,19 @@
     text-align: center;
     margin-bottom: 20px;
 }
+@media (min-width: 1024px) {
+    .container {
+        max-width: 80% !important;
+    }
+}
+.footer {
+    text-align: center;
+    margin-top: 20px;
+    padding: 20px;
+    background-color: #f4f4f4;
+    border-top: 1px solid #e2e2e2;
+}
+/* Styles for the form */
 .form-label {
     display: block;
     margin-bottom: 5px;
@@ -40,18 +53,7 @@
     justify-content: space-between;
     gap: 10px;
 }
-@media (min-width: 1024px) {
-    .container {
-        max-width: 80% !important;
-    }
-}
-.footer {
-    text-align: center;
-    margin-top: 20px;
-    padding: 20px;
-    background-color: #f4f4f4;
-    border-top: 1px solid #e2e2e2;
-}
+/* Styles for context variables */
 .context-row {
     display: flex;
     align-items: center !important;
@@ -63,6 +65,7 @@
 .context-row .delete-btn {
     margin-left: 10px;
 }
+/* Styles for the tooltips */
 .tooltip-container {
     position: relative;
     display: inline-block;
@@ -88,4 +91,97 @@
 .tooltip-container:hover .tooltip-text {
     visibility: visible;
     opacity: 1;
+}
+/* Styles for the floating button and sidebar */
+#sidebar {
+    width: 0;
+    overflow: hidden;
+    transition: width 0.5s ease;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+#sidebar.open {
+    width: 450px;
+    z-index: 9;
+}
+
+#floating-button.hidden {
+    display: none;
+}
+/* Styles for sidebar context variables */
+.sb-context-input-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+.sb-context-variable {
+    display: inline-flex;
+    align-items: center;
+    background-color: #e0e0e0;
+    border-radius: 5px;
+    padding: 5px 10px;
+    margin: 5px;
+}
+
+.sb-context-variable span {
+    margin-right: 5px;
+}
+
+.sb-context-variable button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.sb-context-input {
+    flex-grow: 1;
+    border: none;
+    padding: 5px;
+    min-width: 100px;
+}
+
+.sb-context-input:focus {
+    outline: none;
+}
+/* Loading Effect */
+#dimmed-background, #sb-dimmed-background {
+    display: none;
+}
+
+#dimmed-background.show, #sb-dimmed-background.show {
+    display: block;
+}
+
+#loading-spinner, #sb-loading-spinner {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#loading-spinner.show, #sb-loading-spinner.show {
+    display: flex;
+}
+
+.z-5 {
+    z-index: 5;
+}
+
+/* Spinner styles */
+.spinner-border {
+    border-top-color: #1D4ED8; /* Primary color for the spinner */
+    border-right-color: transparent;
+    border-bottom-color: transparent;
+    border-left-color: transparent;
+    border-style: solid;
+    border-width: 4px;
+    border-radius: 50%;
 }
