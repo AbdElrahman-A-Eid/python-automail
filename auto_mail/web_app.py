@@ -2,6 +2,7 @@
 """
 import os
 import re
+from json.decoder import JSONDecodeError
 from datetime import datetime
 from email.mime.application import MIMEApplication
 from glob import glob
@@ -197,15 +198,18 @@ class WebApp:
                     model_name = params.pop("model"),
                     **params
                 )
-        except (RuntimeError, LangChainException) as e:
+            template, metadata =  generator.generate_template(
+                user_prompt, context_variables, system_prompt
+            )
+        except (RuntimeError, LangChainException, JSONDecodeError) as e:
             return {
                 "message": e,
                 "status": 500
                 }, 500
 
-        template =  generator.generate_template(user_prompt, context_variables, system_prompt)
 
-        return template, 200
+        return {'template': template, 'metadata': metadata,
+                'status': 200}, 200
 
     @staticmethod
     def parse_context_variables(form: Dict[str, str]) -> Dict[str, str]:

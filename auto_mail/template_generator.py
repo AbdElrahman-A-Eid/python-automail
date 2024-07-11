@@ -7,7 +7,9 @@ context variables using a language model.
 """
 
 import json
-from typing import Dict
+import time
+from datetime import timedelta
+from typing import Dict, Tuple
 
 from langchain_community.chat_models import ChatAnyscale
 
@@ -61,7 +63,7 @@ class TemplateGenerator:
 
     def generate_template(
                 self, user_prompt, context_variables, system_prompt: str=""
-            ) -> Dict[str,str]:
+            ) -> Tuple[Dict[str,str], Dict[str,str]]:
         """
         Generates an email template using the specified user prompt and context variables.
 
@@ -70,8 +72,10 @@ class TemplateGenerator:
             context_variables (list): A list of context variables to include in the email.
 
         Returns:
-            Dict[str, str]: A dictionary with 'subject' and 'body' keys containing \
+            Tuple[Dict[str, str], Dict[str,str]]: A tuple containing:
+                - A dictionary with 'subject' and 'body' keys containing \
                 the generated email content.
+                - The token usage dictionary
         """
         if not system_prompt:
             system_prompt = self.SYSTEM_PROMPT
@@ -84,8 +88,12 @@ class TemplateGenerator:
             ("human", user_prompt)
         ]
 
+        st = time.time()
         response = self.llm.invoke(messages)
 
-        print(response)
+        template: Dict[str,str] = json.loads(response.content)
+        token_usage = response.response_metadata['token_usage']
+        token_usage['request_duration'] = str(timedelta(seconds=time.time() - st))
+        stats: Dict[str, str] = {' '.join(k.split('_')).title(): v for k, v in token_usage.items()}
 
-        return json.loads(response.content)
+        return template, stats
