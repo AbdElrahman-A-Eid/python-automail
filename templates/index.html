@@ -6,7 +6,7 @@
     <title>Python AutoMail</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <script src="https://cdn.tiny.cloud/1/{{ tiny_api }}/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
@@ -21,7 +21,7 @@
         </div>
         <form method="post" id="form" enctype="multipart/form-data" class="form" name="form" onsubmit="submit_form(); return false;">
             <div class="form-group">
-                <label for="attendance_criteria" class="form-label">Attendance Filtering Criteria:
+                <label for="attendance_criteria" class="form-label">Attendance Filtering Criteria
                     <span class="tooltip-container">
                         <i class="fas fa-question-circle"></i>
                         <span class="tooltip-text">Filter the recipients based on their session attendance. This is only enabled if there is an "attendance" column in the mail list file.</span>
@@ -36,7 +36,7 @@
             </div>
 
             <div class="form-group">
-                <label for="progress_criteria" class="form-label">Progress Filtering Criteria:
+                <label for="progress_criteria" class="form-label">Progress Filtering Criteria
                     <span class="tooltip-container">
                         <i class="fas fa-question-circle"></i>
                         <span class="tooltip-text">Filter the recipients based on their progress. This is only enabled if there is a "progress" column in the mail list file.</span>
@@ -52,7 +52,7 @@
             </div>
             
             <div class="form-group">
-                <label for="context_variables" class="form-label required"><span>Context Variables:</span>
+                <label for="context_variables" class="form-label required"><span>Context Variables</span>
                     <span class="tooltip-container">
                         <i class="fas fa-question-circle"></i>
                         <span class="tooltip-text">Define context variables to be used in the email. These variables can be inserted into the email subject and/or body using Jinja2 format (e.g., {{ '{{ variable_name }}' }}).</span>
@@ -79,7 +79,7 @@
             </div>
         
             <div class="form-group">
-                <label for="subject" class="form-label required"><span>Subject:</span>
+                <label for="subject" class="form-label required"><span>Subject</span>
                     <span class="tooltip-container">
                         <i class="fas fa-question-circle"></i>
                         <span class="tooltip-text">The subject of the mail. Can include Jinja2 template variables (e.g., {{ '{{ variable_name }}' }}) but "variable_name" must either be defined as a context variable or exist as a column in the mail list file.</span>
@@ -89,7 +89,7 @@
             </div>
         
             <div class="form-group">
-                <label for="body" class="form-label required"><span>Body:</span>
+                <label for="body" class="form-label required"><span>Body</span>
                     <span class="tooltip-container">
                         <i class="fas fa-question-circle"></i>
                         <span class="tooltip-text">The body of the mail. Can include Jinja2 template variables (e.g., {{ '{{ variable_name }}' }}) but "variable_name" must either be defined as a context variable or exist as a column in the mail list file. Can be saved to/ loaded from an HTML template file.</span>
@@ -105,7 +105,7 @@
             </div>
         
             <div class="form-group">
-                <label for="mail_list" class="form-label required"><span>Mail List:</span>
+                <label for="mail_list" class="form-label required"><span>Mail List</span>
                     <span class="tooltip-container">
                         <i class="fas fa-question-circle"></i>
                         <span class="tooltip-text">This CSV file should at least contain "firstName", "lastName", and "email" columns for the app to work.</span>
@@ -115,7 +115,7 @@
             </div>
         
             <div class="form-group">
-                <label for="attachments" class="form-label"><span>Attachment File(s):</span>
+                <label for="attachments" class="form-label"><span>Attachment File(s)</span>
                     <span class="tooltip-container">
                         <i class="fas fa-question-circle"></i>
                         <span class="tooltip-text">Files to be attached to the email.</span>
@@ -136,9 +136,81 @@
             <a href="https://www.linkedin.com/in/abdelrahman-eid/" target="_blank" class="text-blue-500 hover:underline"><i class="fab fa-linkedin"></i> LinkedIn</a>
         </p>
     </div>
+    <div id="sidebar" class="fixed top-0 right-0 w-0 h-full bg-white shadow-lg overflow-hidden transition-all duration-300">
+        <div class="p-8 relative">
+            <h2 class="text-2xl font-bold mb-4">Generate Email Template</h2>
+            <button id="close-sidebar" class="absolute top-4 right-4 text-gray-700 text-lg">
+                &times;
+            </button>
+            <form id="template-form">
+                <div class="mb-0/5">
+                    <label for="model_selection" class="block form-label text-sm font-medium text-gray-700 required"><span>Model Selection</span></label>
+                    <select id="model_selection" name="model_selection" class="block form-input " required>
+                        <option value="meta-llama/Meta-Llama-3-70B-Instruct">Meta-Llama 3-70B Instruct</option>
+                        <option value="meta-llama/Meta-Llama-3-8B-Instruct">Meta Llama 3-8B Instruct</option>
+                        <option value="mistralai/Mistral-7B-Instruct-v0.1">Mistral 7B Instruct v0.1</option>
+                        <option value="mistralai/Mixtral-8x7B-Instruct-v0.1">Mistral 8x7B Instruct v0.1</option>
+                        <option value="mistralai/Mixtral-8x22B-Instruct-v0.1">Mistral 8x22B Instruct v0.1</option>
+                        <option value="custom">Other</option>
+                    </select>
+                    <input type="text" id="custom_model_name" name="custom_model_name" class="block form-input hidden" placeholder="Enter model name">
+                </div>
+                <div class="mb-0/5">
+                    <label for="user_prompt" class="block form-label text-sm font-medium text-gray-700 required"><span>Prompt</span></label>
+                    <textarea id="user_prompt" name="user_prompt" rows="3" class="block form-input" required></textarea>
+                </div>
+                <div class="mb-0/5">
+                    <label for="sb_context_variables" class="block form-label text-sm font-medium text-gray-700">Context Variables</label>
+                    <div id="sb-context-variables-container" class="sb-context-input-container">
+                        <input type="text" id="sb_context_variables_input" class="sb-context-input" placeholder="Add context variables">
+                    </div>
+                </div>                
+                <div class="mb-0/5">
+                    <label for="model_parameters" class="block form-label text-sm font-medium text-gray-700">Model Parameters</label>
+                    <div id="model_parameters" class="grid grid-cols-2 gap-4 mt-2">
+                        <div>
+                            <label for="temperature" class="block form-label text-xs font-medium text-gray-700">Temperature</label>
+                            <input type="number" id="temperature" name="temperature" value="1" step="0.01" min="0" max="2" class="block form-input mb-0">
+                        </div>
+                        <div>
+                            <label for="max_output_length" class="block form-label text-xs font-medium text-gray-700">Max Output Length</label>
+                            <input type="number" id="max_output_length" name="max_output_length" value="4096" step="1" min="1" class="block form-input mb-0">
+                        </div>
+                        <div>
+                            <label for="top_p" class="block form-label text-xs font-medium text-gray-700">Top P</label>
+                            <input type="number" id="top_p" name="top_p" value="1" step="0.01" min="0" max="1" class="block form-input">
+                        </div>
+                        <div>
+                            <label for="frequency_penalty" class="block form-label text-xs font-medium text-gray-700">Frequency Penalty</label>
+                            <input type="number" id="frequency_penalty" name="frequency_penalty" value="0" step="0.01" min="0" max="1" class="block form-input">
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-0/5">
+                    <label for="system_prompt" class="block form-label text-sm font-medium text-gray-700">System Prompt</label>
+                    <textarea id="system_prompt" name="system_prompt" rows="3" class="block form-input" placeholder="Leave blank for the default prompt"></textarea>
+                </div>
+                <div class="flex">
+                    <button type="submit" class="px-4 py-2 form-submit w-full">Generate</button>
+                </div>
+            </form>
+        </div>
+        <div id="sb-loading-spinner" class="z-50 hidden">
+            <div class="spinner-border animate-spin inline-block w-8 h-8 border-4 rounded-full" role="status"></div>
+        </div>
+        <div id="sb-dimmed-background" class="fixed inset-0 bg-black bg-opacity-70 hidden z-10"></div>
+    </div>
+    <button id="floating-button" class="fixed bottom-6 right-6 z-10 form-submit text-white text-l text-center w-16 h-16 rounded-full shadow-lg focus:outline-none">
+        <i class="fas fa-paintbrush"></i>
+    </button>    
+    <div id="dimmed-background" class="fixed inset-0 bg-black bg-opacity-50 hidden z-5"></div>
+    <div id="loading-spinner" class="fixed inset-0 flex items-center justify-center z-50 hidden">
+        <div class="spinner-border animate-spin inline-block w-8 h-8 border-4 rounded-full" role="status"></div>
+    </div>  
     <script src="{{ url_for('static', filename='js/tinymce-init.js') }}"></script>
     <script src="{{ url_for('static', filename='js/context-variable.js') }}"></script>
     <script src="{{ url_for('static', filename='js/notification.js') }}"></script>
     <script src="{{ url_for('static', filename='js/form.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
 </body>
 </html>
