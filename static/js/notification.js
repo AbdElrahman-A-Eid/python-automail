@@ -68,7 +68,7 @@ function generateAlert(response, title) {
             div.classList.add("opacity-0")
             setTimeout(()=>{
                 div.remove()
-            }, 1000)
-        }, 2000);
+            }, 500)
+        }, 600);
     });
 }
