@@ -53,7 +53,7 @@ class TemplateGenerator:
             base_url (str): The base URL for the AnyScale API.
         """
         self.llm = ChatAnyscale(
-                model = model_name,
+                model_name = model_name,
                 base_url = base_url,
                 temperature = temperature,
                 max_tokens = max_output_length,
@@ -85,7 +85,7 @@ class TemplateGenerator:
 
         messages = [
             ("system", prompt),
-            ("human", user_prompt)
+            ("human", user_prompt + '\nJSON OUTPUT ONLY!')
         ]
 
         st = time.time()

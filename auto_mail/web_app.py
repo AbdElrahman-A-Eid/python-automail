@@ -10,6 +10,7 @@ from pathlib import Path
 from smtplib import SMTPConnectError
 from traceback import format_exc
 from typing import Dict, List, Any
+from pydantic.v1.error_wrappers import ValidationError
 
 from dotenv import load_dotenv
 from flask import Flask, flash, redirect, render_template, request, url_for
@@ -201,9 +202,10 @@ class WebApp:
             template, metadata =  generator.generate_template(
                 user_prompt, context_variables, system_prompt
             )
-        except (RuntimeError, LangChainException, JSONDecodeError) as e:
+        except (RuntimeError, LangChainException, JSONDecodeError, ValidationError) as e:
+            print(format_exc(e))
             return {
-                "message": e,
+                "message": str(e),
                 "status": 500
                 }, 500
 
