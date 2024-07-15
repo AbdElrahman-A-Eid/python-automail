@@ -145,6 +145,7 @@ class WebApp:
                             )
                         emails.append(email)
                     except (SMTPConnectError, TimeoutError) as e:
+                        print(format_exc(e))
                         print(f'Error: {e}')
 
                 if recipients:
@@ -153,6 +154,7 @@ class WebApp:
                                 parts, recipients
                             )
                     except (SMTPConnectError, TimeoutError) as e:
+                        print(format_exc(e))
                         print(f'Error: {e}')
 
                 print(f"Number of total emails sent is {len(emails)}!")
