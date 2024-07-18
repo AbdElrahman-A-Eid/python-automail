@@ -1,4 +1,4 @@
-<img src="static/img/logo.png" alt="Python AutoMail App Logo" width=150 style="display: block; margin-left: auto; margin-right: auto; margin-bottom: 15px;"/>
+<div align="center"><img src="static/img/logo.png" alt="Python AutoMail App Logo" width=150/></div><br>
 
 # Python Auto Mail
 
