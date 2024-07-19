@@ -81,7 +81,7 @@ To get started with Python Auto Mail, follow the steps below to set up the proje
 
     ```bash
     git clone https://github.com/AbdElrahman-A-Eid/python-automail.git
-    cd auto_mail
+    cd python-automail
     ```
 
 2. **Create and activate a virtual environment**
