@@ -144,7 +144,12 @@
             </button>
             <form id="template-form">
                 <div class="mb-0/5">
-                    <label for="model_selection" class="block form-label text-sm font-medium text-gray-700 required"><span>Model Selection</span></label>
+                    <label for="model_selection" class="block form-label text-sm font-medium text-gray-700 required"><span>Model Selection</span>
+                        <span class="tooltip-container top-tooltip">
+                            <i class="fas fa-question-circle"></i>
+                            <span class="tooltip-text">Select the language model (from AnyScale) that you want to use for generating the email template. Choose 'Other' to specify a custom model.</span>
+                        </span>
+                    </label>
                     <select id="model_selection" name="model_selection" class="block form-input " required>
                         <option value="meta-llama/Meta-Llama-3-70B-Instruct">Meta-Llama 3-70B Instruct</option>
                         <option value="meta-llama/Meta-Llama-3-8B-Instruct">Meta Llama 3-8B Instruct</option>
@@ -156,11 +161,21 @@
                     <input type="text" id="custom_model_name" name="custom_model_name" class="block form-input hidden" placeholder="Enter model name">
                 </div>
                 <div class="mb-0/5">
-                    <label for="user_prompt" class="block form-label text-sm font-medium text-gray-700 required"><span>Prompt</span></label>
+                    <label for="user_prompt" class="block form-label text-sm font-medium text-gray-700 required"><span>Prompt</span>
+                        <span class="tooltip-container">
+                            <i class="fas fa-question-circle"></i>
+                            <span class="tooltip-text">Enter the text prompt for generating the email template. Be clear and specific about the content you need.</span>
+                        </span>
+                    </label>
                     <textarea id="user_prompt" name="user_prompt" rows="3" class="block form-input" required></textarea>
                 </div>
                 <div class="mb-0/5">
-                    <label for="sb_context_variables" class="block form-label text-sm font-medium text-gray-700">Context Variables</label>
+                    <label for="sb_context_variables" class="block form-label text-sm font-medium text-gray-700"><span>Context Variables</span>
+                        <span class="tooltip-container">
+                            <i class="fas fa-question-circle"></i>
+                            <span class="tooltip-text">Add context variables to customize the email content. Enter each variable and separate with a comma. These will be dynamically included in the generated template as needed.<br><strong>Note:</strong> Context Variables defined in the main form are imported automatically.</span>
+                        </span>
+                    </label>
                     <div id="sb-context-variables-container" class="sb-context-input-container">
                         <input type="text" id="sb_context_variables_input" class="sb-context-input" placeholder="Add context variables">
                     </div>
@@ -169,25 +184,50 @@
                     <label for="model_parameters" class="block form-label text-sm font-medium text-gray-700">Model Parameters</label>
                     <div id="model_parameters" class="grid grid-cols-2 gap-4 mt-2">
                         <div>
-                            <label for="temperature" class="block form-label text-xs font-medium text-gray-700">Temperature</label>
+                            <label for="temperature" class="block form-label text-xs font-medium text-gray-700"><span>Temperature</span>
+                                <span class="tooltip-container">
+                                    <i class="fas fa-question-circle"></i>
+                                    <span class="tooltip-text">Adjust the creativity of the generated content. Higher values (up to 2) result in more creative and random outputs, while lower values (down to 0) make the output more focused and deterministic. Default is 1.</span>
+                                </span>
+                            </label>
                             <input type="number" id="temperature" name="temperature" value="1" step="0.01" min="0" max="2" class="block form-input mb-0">
                         </div>
                         <div>
-                            <label for="max_output_length" class="block form-label text-xs font-medium text-gray-700">Max Output Length</label>
+                            <label for="max_output_length" class="block form-label text-xs font-medium text-gray-700"><span>Max Output Length</span>
+                                <span class="tooltip-container">
+                                    <i class="fas fa-question-circle"></i>
+                                    <span class="tooltip-text">Specify the maximum number of tokens (words and punctuation) for the generated output. Higher values allow for longer outputs. Default is 4096.</span>
+                                </span>
+                            </label>
                             <input type="number" id="max_output_length" name="max_output_length" value="4096" step="1" min="1" class="block form-input mb-0">
                         </div>
                         <div>
-                            <label for="top_p" class="block form-label text-xs font-medium text-gray-700">Top P</label>
+                            <label for="top_p" class="block form-label text-xs font-medium text-gray-700"><span>Top P</span>
+                                <span class="tooltip-container">
+                                    <i class="fas fa-question-circle"></i>
+                                    <span class="tooltip-text">Control the diversity of the generated text. Higher values (up to 1) include more diverse word choices. Default is 1.</span>
+                                </span>
+                            </label>
                             <input type="number" id="top_p" name="top_p" value="1" step="0.01" min="0" max="1" class="block form-input">
                         </div>
                         <div>
-                            <label for="frequency_penalty" class="block form-label text-xs font-medium text-gray-700">Frequency Penalty</label>
+                            <label for="frequency_penalty" class="block form-label text-xs font-medium text-gray-700"><span>Frequency Penalty</span>
+                                <span class="tooltip-container">
+                                    <i class="fas fa-question-circle"></i>
+                                    <span class="tooltip-text">Adjust the penalty for repeated words. Higher values (up to 1) discourage repetition, making the output more varied. Default is 0.</span>
+                                </span>
+                            </label>
                             <input type="number" id="frequency_penalty" name="frequency_penalty" value="0" step="0.01" min="0" max="1" class="block form-input">
                         </div>
                     </div>
                 </div>
                 <div class="mb-0/5">
-                    <label for="system_prompt" class="block form-label text-sm font-medium text-gray-700">System Prompt</label>
+                    <label for="system_prompt" class="block form-label text-sm font-medium text-gray-700"><span>System Prompt</span>
+                        <span class="tooltip-container">
+                            <i class="fas fa-question-circle"></i>
+                            <span class="tooltip-text">Provide a system prompt to guide the language model. Leave blank to use the default system prompt.</span>
+                        </span>
+                    </label>
                     <textarea id="system_prompt" name="system_prompt" rows="3" class="block form-input" placeholder="Leave blank for the default prompt"></textarea>
                 </div>
                 <div class="flex">
