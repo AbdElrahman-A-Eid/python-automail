@@ -21,7 +21,7 @@
         </div>
         <form method="post" id="form" enctype="multipart/form-data" class="form" name="form" onsubmit="submit_form(); return false;">
             <div class="form-group">
-                <label for="attendance_criteria" class="form-label">Attendance Filtering Criteria
+                <label for="attendance_criteria" class="form-label"><span>Attendance Filtering Criteria</span>
                     <span class="tooltip-container">
                         <i class="fas fa-question-circle"></i>
                         <span class="tooltip-text">Filter the recipients based on their session attendance. This is only enabled if there is an "attendance" column in the mail list file.</span>
@@ -36,7 +36,7 @@
             </div>
 
             <div class="form-group">
-                <label for="progress_criteria" class="form-label">Progress Filtering Criteria
+                <label for="progress_criteria" class="form-label"><span>Progress Filtering Criteria</span>
                     <span class="tooltip-container">
                         <i class="fas fa-question-circle"></i>
                         <span class="tooltip-text">Filter the recipients based on their progress. This is only enabled if there is a "progress" column in the mail list file.</span>
@@ -251,6 +251,7 @@
     <script src="{{ url_for('static', filename='js/context-variable.js') }}"></script>
     <script src="{{ url_for('static', filename='js/notification.js') }}"></script>
     <script src="{{ url_for('static', filename='js/form.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/tooltip.js') }}"></script>
     <script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
 </body>
 </html>
