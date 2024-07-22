@@ -121,6 +121,15 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     });
+
+    $(function() {
+        var $sidebar = $('#sidebar');
+        $sidebar.bind('scroll', function() {
+            if ($sidebar.scrollLeft() !== 0) {
+                $sidebar.scrollLeft(0);
+            }
+        });
+    }); 
 });
 
 function removeDuplicateSbContextVariables() {
