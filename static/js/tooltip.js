@@ -9,13 +9,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
 function resetTooltips() {
     document.querySelectorAll('.tooltip-container').forEach((tooltip) => {
-        tooltip.classList.remove('top-tooltip', 'right-tooltip')
+        tooltip.classList.remove('top-tooltip', 'right-tooltip', 'left-tooltip')
     });
 };
 
 function adaptTooltip(tooltip) {
     const tooltipText = tooltip.querySelector('.tooltip-text');
     const tooltipRect = tooltipText.getBoundingClientRect();
+    const sidebarRectLeft = document.querySelector('#sidebar').getBoundingClientRect().left;
 
     if (tooltipRect.top - 5 < 0) {
         tooltip.classList.add('top-tooltip');
@@ -23,5 +24,9 @@ function adaptTooltip(tooltip) {
 
     if (tooltipRect.right + 5 > window.innerWidth) {
         tooltip.classList.add('right-tooltip');
+    }
+
+    if (tooltipRect.left - 5 < sidebarRectLeft) {
+        tooltip.classList.add('left-tooltip');
     }
 };

@@ -99,6 +99,9 @@
 .tooltip-container.right-tooltip .tooltip-text {
     transform: translateX(-50%);
 }
+.tooltip-container.left-tooltip .tooltip-text {
+    transform: translateX(12%);
+}
 
 /* Styles for sidebar tooltips */
 #sidebar .tooltip-container .tooltip-text {
@@ -109,16 +112,14 @@
 /* Styles for the floating button and sidebar */
 #sidebar {
     width: 0;
-    overflow: visible;
     transition: width 0.5s ease;
     height: 100vh;
-    overflow-y: auto;
 }
 
 #sidebar.open {
     width: 450px;
     z-index: 9;
-    overflow: visible;
+    overflow-y: auto;
 }
 
 #floating-button.hidden {
