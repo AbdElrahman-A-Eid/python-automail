@@ -12,11 +12,12 @@ Python Auto Mail is an automated email template generation and sending applicati
 2. [Project Structure](#project-structure)
 3. [Installation](#installation)
 4. [Setting Up the Environment](#setting-up-the-environment)
-5. [Usage](#usage)
-6. [Features](#features)
-7. [Contributing](#contributing)
-8. [License](#license)
-9. [Contact](#contact)
+5. [App Screenshot](#screenshots)
+6. [Usage](#usage)
+7. [Features](#features)
+8. [Contributing](#contributing)
+9. [License](#license)
+10. [Contact](#contact)
 
 ---
 
@@ -114,6 +115,14 @@ Python Auto Mail uses environment variables for configuration. Follow the steps 
 2. **Configure environment variables**
 
     Open the `.env` file in a text editor and provide the necessary configuration values. The `.env.template` includes placeholders for all required variables.
+
+---
+
+## Screenshots
+
+<div align="center"><img src="screenshots/Screenshot_01.png" alt="Screenshot 1"/></div>
+<div align="center"><img src="screenshots/Screenshot_02.png" alt="Screenshot 2"/></div>
+<div align="center"><img src="screenshots/Screenshot_03.png" alt="Screenshot 3"/></div>
 
 ---
 
